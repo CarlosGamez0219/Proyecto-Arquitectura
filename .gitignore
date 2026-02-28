@@ -1,0 +1,7 @@
+# Docker
+.docker/
+# Ignorar bases de datos locales o logs
+data/
+*.log
+# Variables de entorno sensibles
+.env

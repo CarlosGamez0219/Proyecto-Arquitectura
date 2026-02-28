@@ -1,0 +1,39 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h2>Juego de Memoria - Nivel: <span id="nivel-txt">Básico</span></h2>
+
+            <div class="d-flex justify-content-around my-3 p-3 bg-light border rounded">
+                <div><strong>Tiempo:</strong> <span id="cronometro">0</span>s</div>
+                <div><strong>Intentos:</strong> <span id="intentos">0</span></div>
+            </div>
+
+            <div id="tablero" class="row row-cols-4 g-2 justify-content-center">
+                {% for i in "1234567890123456" %}
+                <div class="col">
+                    <div class="card bg-primary text-white" style="height: 100px; cursor: pointer;">
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h3 class="card-back">?</h3>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilo básico para las cartas */
+    .card {
+        transition: transform 0.3s;
+        transform-style: preserve-3d;
+    }
+
+    .card.flipped {
+        transform: rotateY(180deg);
+        background-color: #28a745 !important;
+    }
+</style>
+{% endblock %}

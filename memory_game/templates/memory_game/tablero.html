@@ -1,39 +1,189 @@
-{% extends 'base.html' %} {% block content %}
-<div class="container mt-5">
+{% extends 'memory_game/base.html' %}
+{% block content %}
+<div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
-            <h2>Juego de Memoria - Nivel: <span id="nivel-txt">Básico</span></h2>
 
-            <div class="d-flex justify-content-around my-3 p-3 bg-light border rounded">
-                <div><strong>Tiempo:</strong> <span id="cronometro">0</span>s</div>
-                <div><strong>Intentos:</strong> <span id="intentos">0</span></div>
+            <h2>Memory Game — Nivel: <span id="nivel-txt">{{ nivel }}</span></h2>
+
+            <div class="d-flex justify-content-around my-3 p-3 bg-secondary border rounded">
+                <div><strong>⏱ Tiempo:</strong> <span id="cronometro">{{ tiempo }}</span>s</div>
+                <div><strong>❤️ Intentos:</strong> <span id="intentos-restantes">{{ intentos }}</span></div>
+                <div><strong>✅ Parejas:</strong> <span id="parejas">0</span>/8</div>
             </div>
 
-            <div id="tablero" class="row row-cols-4 g-2 justify-content-center">
-                {% for i in "1234567890123456" %}
-                <div class="col">
-                    <div class="card bg-primary text-white" style="height: 100px; cursor: pointer;">
-                        <div class="card-body d-flex align-items-center justify-content-center">
-                            <h3 class="card-back">?</h3>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+            <div id="tablero" class="row row-cols-4 g-2 justify-content-center"></div>
+
         </div>
     </div>
 </div>
 
 <style>
-    /* Estilo básico para las cartas */
-    .card {
-        transition: transform 0.3s;
-        transform-style: preserve-3d;
+    .carta-wrapper {
+        perspective: 600px;
     }
 
-    .card.flipped {
+    .carta {
+        width: 100%;
+        height: 100px;
+        cursor: pointer;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.5s;
+        border-radius: 10px;
+    }
+
+    .carta.flipped {
         transform: rotateY(180deg);
-        background-color: #28a745 !important;
+    }
+
+    .carta-frente,
+    .carta-dorso {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .carta-dorso {
+        background: #0d6efd;
+        font-size: 2rem;
+    }
+
+    .carta-frente {
+        background: #198754;
+        font-size: 2.5rem;
+        transform: rotateY(180deg);
+    }
+
+    .carta.encontrada {
+        opacity: 0.5;
+        pointer-events: none;
     }
 </style>
+
+<script>
+    // — Config desde Django —
+    const NIVEL = "{{ nivel }}";
+    const TIEMPO_INICIAL = parseInt("{{ tiempo }}");
+    const INTENTOS_INICIAL = parseInt("{{ intentos }}");
+
+    const iconos = ['🚀', '🤖', '🎮', '🍕', '🌈', '🔥', '💎', '⚽'];
+    let cartas = [...iconos, ...iconos].sort(() => Math.random() - 0.5);
+
+    let seleccionadas = [];
+    let parejas = 0;
+    let intentosLeft = INTENTOS_INICIAL;
+    let tiempoLeft = TIEMPO_INICIAL;
+    let cronometroId = null;
+    let bloqueado = false;
+    let juegoActivo = false;
+
+    const tablero = document.getElementById('tablero');
+    const elCrono = document.getElementById('cronometro');
+    const elIntentos = document.getElementById('intentos-restantes');
+    const elParejas = document.getElementById('parejas');
+
+    // — Construir tablero —
+    function construirTablero() {
+        tablero.innerHTML = '';
+        cartas.forEach((icono, i) => {
+            const col = document.createElement('div');
+            col.className = 'col carta-wrapper';
+            col.innerHTML = `
+        <div class="carta" data-icono="${icono}" data-index="${i}">
+          <div class="carta-dorso">🂠</div>
+          <div class="carta-frente">${icono}</div>
+        </div>`;
+            col.querySelector('.carta').addEventListener('click', alClickCarta);
+            tablero.appendChild(col);
+        });
+    }
+
+    // — Click en carta —
+    function alClickCarta() {
+        if (bloqueado || this.classList.contains('flipped') || this.classList.contains('encontrada')) return;
+
+        if (!juegoActivo) iniciarCronometro();
+
+        this.classList.add('flipped');
+        seleccionadas.push(this);
+
+        if (seleccionadas.length === 2) {
+            bloqueado = true;
+            setTimeout(revisarPareja, 900);
+        }
+    }
+
+    // — Revisar pareja —
+    function revisarPareja() {
+        const [c1, c2] = seleccionadas;
+        if (c1.dataset.icono === c2.dataset.icono) {
+            c1.classList.add('encontrada');
+            c2.classList.add('encontrada');
+            parejas++;
+            elParejas.innerText = parejas;
+            if (parejas === iconos.length) terminarJuego('Victoria');
+        } else {
+            intentosLeft--;
+            elIntentos.innerText = intentosLeft;
+            c1.classList.remove('flipped');
+            c2.classList.remove('flipped');
+            if (intentosLeft <= 0) terminarJuego('Derrota');
+        }
+        seleccionadas = [];
+        bloqueado = false;
+    }
+
+    // — Cronómetro —
+    function iniciarCronometro() {
+        juegoActivo = true;
+        cronometroId = setInterval(() => {
+            tiempoLeft--;
+            elCrono.innerText = tiempoLeft;
+            if (tiempoLeft <= 0) terminarJuego('Derrota');
+        }, 1000);
+    }
+
+    // — Fin del juego —
+    function terminarJuego(resultado) {
+        clearInterval(cronometroId);
+        juegoActivo = false;
+        bloqueado = true;
+
+        const tiempoUsado = TIEMPO_INICIAL - tiempoLeft;
+
+        // Guardar en backend
+        fetch("{% url 'registrar_partida' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                nivel: NIVEL,
+                resultado: resultado,
+                tiempo: tiempoUsado,
+                intentos: INTENTOS_INICIAL - intentosLeft
+            })
+        }).then(() => {
+            const msg = resultado === 'Victoria'
+                ? `🎉 ¡Ganaste! Tiempo: ${tiempoUsado}s`
+                : `💀 ¡Perdiste! Se agotaron los ${intentosLeft <= 0 ? 'intentos' : 'segundos'}.`;
+            setTimeout(() => {
+                if (confirm(msg + '\n\n¿Jugar de nuevo?')) {
+                    window.location.href = "{% url 'seleccionar_nivel' %}";
+                } else {
+                    window.location.href = "{% url 'perfil' %}";
+                }
+            }, 300);
+        });
+    }
+
+    construirTablero();
+</script>
 {% endblock %}

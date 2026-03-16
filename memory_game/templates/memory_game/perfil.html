@@ -1,0 +1,68 @@
+{% extends 'memory_game/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+
+        <div class="col-md-5">
+            <div class="card bg-secondary text-white p-4 mb-4">
+                <h4 class="mb-3">👤 {{ request.user.username }}</h4>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item bg-dark text-white">🏆 Victorias: <strong>{{ stats.victorias }}</strong>
+                    </li>
+                    <li class="list-group-item bg-dark text-white">💀 Derrotas: <strong>{{ stats.derrotas }}</strong>
+                    </li>
+                    <li class="list-group-item bg-dark text-white">🎮 Partidas jugadas: <strong>{{ stats.total_partidas
+                            }}</strong></li>
+                    <li class="list-group-item bg-dark text-white">⏱ Tiempo promedio: <strong>{{
+                            stats.tiempo_promedio|floatformat:1 }}s</strong></li>
+                    <li class="list-group-item bg-dark text-white">⭐ Nivel más jugado: <strong>{{ stats.nivel_mas_jugado
+                            }}</strong></li>
+                </ul>
+                <div class="mt-3 d-grid gap-2">
+                    <a href="{% url 'seleccionar_nivel' %}" class="btn btn-primary">🎮 Jugar de nuevo</a>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-light">🚪 Cerrar sesión</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card bg-secondary text-white p-4">
+                <h4 class="mb-3">📋 Últimas 10 partidas</h4>
+                {% if historial %}
+                <table class="table table-dark table-sm">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Nivel</th>
+                            <th>Resultado</th>
+                            <th>Tiempo</th>
+                            <th>Intentos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in historial %}
+                        <tr>
+                            <td>{{ p.fecha|date:"d/m/y H:i" }}</td>
+                            <td>{{ p.nivel }}</td>
+                            <td>
+                                {% if p.resultado == 'Victoria' %}
+                                <span class="badge bg-success">{{ p.resultado }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">{{ p.resultado }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ p.tiempo_segundos }}s</td>
+                            <td>{{ p.intentos_realizados }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">Aún no has jugado ninguna partida.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

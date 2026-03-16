@@ -1,0 +1,24 @@
+{% extends 'memory_game/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <h2 class="mb-4">Selecciona tu nivel</h2>
+            <div class="d-grid gap-3">
+
+                <a href="{% url 'jugar_memoria' %}?nivel=Básico" class="btn btn-success btn-lg">
+                    🟢 Básico — 6 intentos · 60 segundos
+                </a>
+
+                <a href="{% url 'jugar_memoria' %}?nivel=Medio" class="btn btn-warning btn-lg">
+                    🟡 Medio — 4 intentos · 45 segundos
+                </a>
+
+                <a href="{% url 'jugar_memoria' %}?nivel=Avanzado" class="btn btn-danger btn-lg">
+                    🔴 Avanzado — 2 intentos · 30 segundos
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

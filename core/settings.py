@@ -96,3 +96,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/juego/login/'
 LOGIN_REDIRECT_URL = '/juego/nivel/'
 LOGOUT_REDIRECT_URL = '/juego/login/'
+
+#CSRF_TRUSTED_ORIGINS = ['https://proyecto-arquitectura-production.up.railway.app']

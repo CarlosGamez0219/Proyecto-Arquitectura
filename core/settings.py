@@ -97,4 +97,4 @@ LOGIN_URL = '/juego/login/'
 LOGIN_REDIRECT_URL = '/juego/nivel/'
 LOGOUT_REDIRECT_URL = '/juego/login/'
 
-#CSRF_TRUSTED_ORIGINS = ['https://proyecto-arquitectura-production.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://proyecto-arquitectura-production.up.railway.app']

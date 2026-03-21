@@ -1,0 +1,66 @@
+{% extends 'memory_game/base.html' %}
+{% block content %}
+<style>
+    .table td, .table th {
+        color: white !important;
+    }
+</style>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 text-center">
+            <h2 class="mb-4">🏆 Tabla de Mejores Tiempos</h2>
+
+            <div class="row g-4">
+                {% for nivel, partidas in ranking.items %}
+                <div class="col-md-4">
+                    <div class="card h-100"
+                        style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);">
+                        <div class="card-header text-center fw-bold" style="background: rgba(255,255,255,0.05); color: white;">
+                            {% if nivel == 'Básico' %}🟢{% elif nivel == 'Medio' %}🟡{% else %}🔴{% endif %}
+                            {{ nivel }}
+                        </div>
+                        <div class="card-body p-0">
+                            {% if partidas %}
+                            <table class="table table-dark table-sm mb-0" style="color: white !important;">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Jugador</th>
+                                        <th>Tiempo</th>
+                                        <th>Intentos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in partidas %}
+                                    <tr {% if p.usuario.id == user_id %}style="color: gold;" {% endif %}>
+                                        <td>
+                                            {% if forloop.counter == 1 %}🥇
+                                            {% elif forloop.counter == 2 %}🥈
+                                            {% elif forloop.counter == 3 %}🥉
+                                            {% else %}{{ forloop.counter }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ p.usuario.username }}</td>
+                                        <td>{{ p.tiempo_segundos }}s</td>
+                                        <td>{{ p.intentos_realizados }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p class="text-white p-3 mb-0">Sin partidas aún.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-4 d-flex justify-content-center gap-3">
+                <a href="{% url 'seleccionar_nivel' %}" class="btn btn-primary">🎮 Jugar</a>
+                <a href="{% url 'perfil' %}" class="btn btn-outline-light">👤 Mi Perfil</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

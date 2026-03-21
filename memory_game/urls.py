@@ -15,4 +15,7 @@ urlpatterns = [
 
     # Perfil
     path('perfil/', views.ver_perfil, name='perfil'),
+
+    #Ranking
+    path('ranking/', views.ver_ranking, name='ranking')
 ]

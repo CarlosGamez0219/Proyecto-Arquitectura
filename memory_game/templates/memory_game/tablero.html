@@ -1,4 +1,5 @@
 {% extends 'memory_game/base.html' %}
+{% load static %}
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
@@ -12,7 +13,8 @@
                 <div><strong>✅ Parejas:</strong> <span id="parejas">0</span>/8</div>
             </div>
 
-            <div id="tablero" class="row row-cols-4 g-2 justify-content-center"></div>
+            <div id="tablero" class="row row-cols-4 g-2 justify-content-center"
+                style="max-width: 420px; margin: 0 auto;"></div>
 
         </div>
     </div>
@@ -21,11 +23,127 @@
 <style>
     .carta-wrapper {
         perspective: 600px;
+        aspect-ratio: 949 / 1261;
+        margin: 0 auto;
+    }
+
+    .carta-inner {
+        width: 100%;
+        height: 100%;
+        animation: flotar 3s ease-in-out infinite;
+        transform-origin: center bottom;
+        transition: filter 0.2s ease;
+    }
+
+    .carta-wrapper:nth-child(1) .carta-inner {
+        animation-delay: 0.0s;
+        animation-duration: 3.1s;
+    }
+
+    .carta-wrapper:nth-child(2) .carta-inner {
+        animation-delay: 0.4s;
+        animation-duration: 2.8s;
+    }
+
+    .carta-wrapper:nth-child(3) .carta-inner {
+        animation-delay: 0.8s;
+        animation-duration: 3.3s;
+    }
+
+    .carta-wrapper:nth-child(4) .carta-inner {
+        animation-delay: 1.2s;
+        animation-duration: 2.9s;
+    }
+
+    .carta-wrapper:nth-child(5) .carta-inner {
+        animation-delay: 0.3s;
+        animation-duration: 3.5s;
+    }
+
+    .carta-wrapper:nth-child(6) .carta-inner {
+        animation-delay: 0.7s;
+        animation-duration: 2.7s;
+    }
+
+    .carta-wrapper:nth-child(7) .carta-inner {
+        animation-delay: 1.1s;
+        animation-duration: 3.2s;
+    }
+
+    .carta-wrapper:nth-child(8) .carta-inner {
+        animation-delay: 1.5s;
+        animation-duration: 3.0s;
+    }
+
+    .carta-wrapper:nth-child(9) .carta-inner {
+        animation-delay: 0.2s;
+        animation-duration: 2.8s;
+    }
+
+    .carta-wrapper:nth-child(10) .carta-inner {
+        animation-delay: 0.6s;
+        animation-duration: 3.4s;
+    }
+
+    .carta-wrapper:nth-child(11) .carta-inner {
+        animation-delay: 1.0s;
+        animation-duration: 3.1s;
+    }
+
+    .carta-wrapper:nth-child(12) .carta-inner {
+        animation-delay: 1.4s;
+        animation-duration: 2.9s;
+    }
+
+    .carta-wrapper:nth-child(13) .carta-inner {
+        animation-delay: 0.5s;
+        animation-duration: 3.3s;
+    }
+
+    .carta-wrapper:nth-child(14) .carta-inner {
+        animation-delay: 0.9s;
+        animation-duration: 2.6s;
+    }
+
+    .carta-wrapper:nth-child(15) .carta-inner {
+        animation-delay: 1.3s;
+        animation-duration: 3.5s;
+    }
+
+    .carta-wrapper:nth-child(16) .carta-inner {
+        animation-delay: 0.1s;
+        animation-duration: 3.0s;
+    }
+
+    .carta-wrapper.encontrada .carta-inner {
+        animation: none;
+    }
+
+    .carta-wrapper:hover .carta-inner {
+        filter: brightness(1.3) drop-shadow(0 0 8px rgba(255, 200, 50, 0.8));
+    }
+
+    .carta-wrapper.encontrada:hover .carta-inner {
+        filter: none;
+    }
+
+    @keyframes flotar {
+        0% {
+            transform: rotate(-0.8deg) scale(1);
+        }
+
+        50% {
+            transform: rotate(0.8deg) scale(1.02);
+        }
+
+        100% {
+            transform: rotate(-0.8deg) scale(1);
+        }
     }
 
     .carta {
         width: 100%;
-        height: 100px;
+        height: 100%;
         cursor: pointer;
         position: relative;
         transform-style: preserve-3d;
@@ -35,6 +153,11 @@
 
     .carta.flipped {
         transform: rotateY(180deg);
+    }
+
+    .carta.encontrada {
+        opacity: 0.5;
+        pointer-events: none;
     }
 
     .carta-frente,
@@ -50,29 +173,45 @@
     }
 
     .carta-dorso {
-        background: #0d6efd;
-        font-size: 2rem;
+        background-image: var(--lomo-url);
+        background-size: 100% 100%;
+        background-position: center;
+        font-size: 0;
     }
 
     .carta-frente {
-        background: #198754;
-        font-size: 2.5rem;
         transform: rotateY(180deg);
-    }
-
-    .carta.encontrada {
-        opacity: 0.5;
-        pointer-events: none;
+        background-size: 100% 100%;
+        background-position: center;
+        padding: 0;
+        overflow: hidden;
     }
 </style>
 
 <script>
-    // — Config desde Django —
     const NIVEL = "{{ nivel }}";
     const TIEMPO_INICIAL = parseInt("{{ tiempo }}");
     const INTENTOS_INICIAL = parseInt("{{ intentos }}");
 
-    const iconos = ['🚀', '🤖', '🎮', '🍕', '🌈', '🔥', '💎', '⚽'];
+    const LOMOS = [
+        "{% static 'memory_game/img/lomos/Deck Backs1.png' %}",
+        "{% static 'memory_game/img/lomos/Deck Backs13.png' %}",
+        "{% static 'memory_game/img/lomos/Deck Backs17.png' %}",
+        "{% static 'memory_game/img/lomos/Deck Backs18.png' %}",
+        "{% static 'memory_game/img/lomos/Deck Backs8.png' %}",
+    ];
+    const LOMO_ELEGIDO = LOMOS[Math.floor(Math.random() * LOMOS.length)];
+
+    const iconos = [
+        "{% static 'memory_game/img/cartas/Baseball.png' %}",
+        "{% static 'memory_game/img/cartas/Constelacion.png' %}",
+        "{% static 'memory_game/img/cartas/Flor.png' %}",
+        "{% static 'memory_game/img/cartas/Hacker.png' %}",
+        "{% static 'memory_game/img/cartas/Joker Bolo.png' %}",
+        "{% static 'memory_game/img/cartas/Joker Esqueleto.png' %}",
+        "{% static 'memory_game/img/cartas/Loco.png' %}",
+        "{% static 'memory_game/img/cartas/Reina.png' %}",
+    ];
     let cartas = [...iconos, ...iconos].sort(() => Math.random() - 0.5);
 
     let seleccionadas = [];
@@ -88,26 +227,30 @@
     const elIntentos = document.getElementById('intentos-restantes');
     const elParejas = document.getElementById('parejas');
 
-    // — Construir tablero —
+    // — MODO DEBUG (quitar antes de entregar) —
+    window.ganar = () => terminarJuego('Victoria');
+    window.perder = () => terminarJuego('Derrota');
+
     function construirTablero() {
+        document.documentElement.style.setProperty('--lomo-url', `url("${LOMO_ELEGIDO}")`);
         tablero.innerHTML = '';
         cartas.forEach((icono, i) => {
             const col = document.createElement('div');
             col.className = 'col carta-wrapper';
             col.innerHTML = `
-        <div class="carta" data-icono="${icono}" data-index="${i}">
-          <div class="carta-dorso">🂠</div>
-          <div class="carta-frente">${icono}</div>
-        </div>`;
+                <div class="carta-inner">
+                    <div class="carta" data-icono="${icono}" data-index="${i}">
+                        <div class="carta-dorso"></div>
+                        <div class="carta-frente" style="background-image: url('${icono}');"></div>
+                    </div>
+                </div>`;
             col.querySelector('.carta').addEventListener('click', alClickCarta);
             tablero.appendChild(col);
         });
     }
 
-    // — Click en carta —
     function alClickCarta() {
         if (bloqueado || this.classList.contains('flipped') || this.classList.contains('encontrada')) return;
-
         if (!juegoActivo) iniciarCronometro();
 
         this.classList.add('flipped');
@@ -119,12 +262,13 @@
         }
     }
 
-    // — Revisar pareja —
     function revisarPareja() {
         const [c1, c2] = seleccionadas;
         if (c1.dataset.icono === c2.dataset.icono) {
             c1.classList.add('encontrada');
             c2.classList.add('encontrada');
+            c1.closest('.carta-wrapper').classList.add('encontrada');
+            c2.closest('.carta-wrapper').classList.add('encontrada');
             parejas++;
             elParejas.innerText = parejas;
             if (parejas === iconos.length) terminarJuego('Victoria');
@@ -139,7 +283,6 @@
         bloqueado = false;
     }
 
-    // — Cronómetro —
     function iniciarCronometro() {
         juegoActivo = true;
         cronometroId = setInterval(() => {
@@ -149,7 +292,6 @@
         }, 1000);
     }
 
-    // — Fin del juego —
     function terminarJuego(resultado) {
         clearInterval(cronometroId);
         juegoActivo = false;
@@ -157,7 +299,6 @@
 
         const tiempoUsado = TIEMPO_INICIAL - tiempoLeft;
 
-        // Guardar en backend
         fetch("{% url 'registrar_partida' %}", {
             method: 'POST',
             headers: {

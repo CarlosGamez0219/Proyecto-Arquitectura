@@ -115,3 +115,21 @@ def ver_perfil(request):
         'stats':    stats,
         'historial': historial,
     })
+
+
+# ─── RANKING ─────────────────────────────────────────────────────────────────
+
+@login_required
+def ver_ranking(request):
+    niveles = ['Básico', 'Medio', 'Avanzado']
+    ranking = {}
+    for nivel in niveles:
+        ranking[nivel] = Partida.objects.filter(
+            nivel=nivel,
+            resultado='Victoria'
+        ).order_by('tiempo_segundos')[:10]
+
+    return render(request, 'memory_game/ranking.html', {
+        'ranking': ranking,
+        'user_id': request.user.id
+    })
